@@ -108,6 +108,10 @@ const dataNavMenu: NavbarDTO = {
     {name: 'Cấu trúc đề thi'},
     {name: 'Khóa thi', href: '/executions'},
     {name: 'Quản lý Tags', href: '/tags'},
+    {
+      name: 'Câu hỏi',
+      href: '/question',
+    },
   ],
 };
 

@@ -36,22 +36,22 @@ export const tailwindOnly = (Content: NextComponentType): ReactNode => {
     const isServer = !!req;
     let showSidebar = true;
 
-    const loginUser = selectors.selectLoginUser(store.getState());
-    if (isServer) {
-      showSidebar = getBooleanCookieFromRequest(SHOW_SIDEBAR_COOKIE, req, true);
+    // const loginUser = selectors.selectLoginUser(store.getState());
+    // if (isServer) {
+    //   showSidebar = getBooleanCookieFromRequest(SHOW_SIDEBAR_COOKIE, req, true);
 
-      if (!loginUser) {
-        // res.writeHead(302, {Location: '/'});
-        // res.end();
-        res.setHeader('Location', '/');
-        res.statusCode = 302;
-      }
-    } else {
-      if (!loginUser) {
-        await Router.replace('/');
-        return;
-      }
-    }
+    //   if (!loginUser) {
+    //     // res.writeHead(302, {Location: '/'});
+    //     // res.end();
+    //     res.setHeader('Location', '/');
+    //     res.statusCode = 302;
+    //   }
+    // } else {
+    //   if (!loginUser) {
+    //     await Router.replace('/');
+    //     return;
+    //   }
+    // }
 
     return {
       showSidebar,
