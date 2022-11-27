@@ -1,0 +1,14 @@
+.idea
+.vscode
+build-bundle/
+*.log
+.next
+node_modules
+
+build
+.env
+
+.DS_Store
+
+deploy/bundle.tar.gz
+out

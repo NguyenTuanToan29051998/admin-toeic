@@ -1,0 +1,13 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+.test-border {
+  border: 1px solid;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+* {
+  font-family: 'Roboto', sans-serif;
+}

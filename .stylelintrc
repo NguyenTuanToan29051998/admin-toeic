@@ -1,0 +1,23 @@
+{
+  "extends": "stylelint-config-standard",
+  "formatter": "stylelint-checkstyle-formatter",
+  "plugins": [
+    "stylelint-scss"
+  ],
+  "ignoreFiles": [
+    "scss/common/coreui/**/*",
+    "scss/bootstrap-scss/*",
+    "scss/font-aw/**/*",
+    "scss/bs-icon/**/*",
+    "out/**/*"
+  ],
+  "rules": {
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind"]
+      }
+    ]
+  }
+}
