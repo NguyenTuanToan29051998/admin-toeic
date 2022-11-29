@@ -34,7 +34,7 @@ export const tailwindOnly = (Content: NextComponentType): ReactNode => {
   ): Promise<TailwindWrapperProps> => {
     const {req, res, store} = ctx;
     const isServer = !!req;
-    let showSidebar = true;
+    const showSidebar = true;
 
     // const loginUser = selectors.selectLoginUser(store.getState());
     // if (isServer) {
