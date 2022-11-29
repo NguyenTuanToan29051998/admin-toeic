@@ -175,8 +175,8 @@ const Container = (props: Props): JSX.Element => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row md:min-h-screen h-auto ">
-        <div className="flex sm:flex-col sm:w-64 bg-secondary-700 h-full border-r overflow-y-auto overflow-x-hidden">
+      <div className="flex flex-row h-screen">
+        <div className="flex sm:flex-col sm:w-64 bg-secondary-700 border-r overflow-y-auto overflow-x-hidden">
           <div className="sm:py-8 sm:self-center p-1">
             <button className="flex fex-row items-center bg-primary-200 hover:bg-primary-400 text-white font-bold py-2 px-4 rounded min-w-max">
               {plusIconBS('text-lg')}
