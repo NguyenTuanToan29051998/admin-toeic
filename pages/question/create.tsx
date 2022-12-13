@@ -80,9 +80,11 @@ const QuestionCreate: FC = () => {
   const onChangeFile = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const fileName = e.target.value.split(/(\\|\/)/g).pop();
     if (e.target.files && e.target.files[0].size / 1024 / 1024 >= 10) {
+      console.log(e.target.files[0], 'xx');
       setShowErrorFile({...showErrorFile, isErrorSize: true});
       return;
     }
+    console.log(e.target.files[0], 'kk');
     if (fileName.includes('.mp3')) {
       setShowErrorFile({
         ...showErrorFile,
@@ -118,7 +120,7 @@ const QuestionCreate: FC = () => {
                 <label
                   htmlFor="dropzone-file"
                   className="justify-center cursor-pointer">
-                  <div className="flex gap-1 border rounded-md mt-4 py-1 px-3 w-28 justify-center items-center">
+                  <div className="flex gap-1 border rounded-md mt-4 py-1 px-3 w-28 justify-center items-center mb-5">
                     {plusIconBS('text-2xl')}
                     <div>Tải ảnh</div>
                   </div>
@@ -2472,7 +2474,7 @@ const QuestionCreate: FC = () => {
     <div className="container">
       <div className="bg-white rounded-lg relative dark:bg-gray-700">
         <div className="flex items-center justify-between p-5 mt-5 rounded-t">
-          <span className="text-xl font-semibold">Tạo mới đề thi</span>
+          <span className="text-xl font-semibold">Tạo mới câu hỏi</span>
         </div>
         <div className="bg-white">
           <div className="py-5 px-6">
@@ -2498,7 +2500,7 @@ const QuestionCreate: FC = () => {
             type="button"
             className="flex gap-2 items-center text-sm px-8 py-2.5 border-2 border-green-00BF6F text-white font-medium leading-tight rounded-r-[2px] hover:bg-green-00BF6F focus:outline-none focus:ring-0 transition duration-150 ease-in-out bg-green-00BF6F"
             onClick={(): void => setShowModalCreateQuestion(false)}>
-            Tạo đề thi
+            Tạo câu hỏi
           </button>
         </div>
       </div>

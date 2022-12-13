@@ -1,4 +1,4 @@
-import {useRouter} from 'next/router';
+import {NextRouter, useRouter} from 'next/router';
 import React, {FC, useMemo, useRef, useState} from 'react';
 import Dropdown from '../../components/Dropdown';
 import PaginationSection from '../../components/PaginationSection';
@@ -26,7 +26,7 @@ const Question: FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(5);
   const [showModalCreateQuestion, setShowModalCreateQuestion] = useState<
     boolean
-  >(true);
+  >(false);
   const [fileImg, setFileImg] = useState<File>(null);
   const [questionType, setQuestionType] = useState<string>('PART 1: PHOTOS');
   const [file, setFile] = useState<string>('');
@@ -2588,7 +2588,7 @@ const Question: FC = () => {
                     {plusIconBS('text-xl')}
                     <span
                       className="text-base"
-                      onClick={(): void => setShowModalCreateQuestion(true)}>
+                      onClick={() => router.push('question/create')}>
                       Tạo mới câu hỏi
                     </span>
                   </span>

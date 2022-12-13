@@ -162,16 +162,16 @@ const Container = (props: Props): JSX.Element => {
       <div className="flex justify-between items-center h-14 border-b">
         <div className="pl-5">Logo</div>
         <div className="flex flex-row pr-5 space-x-3 justify-between items-center">
-          {magnifyingGlassIcon}
+          {/* {magnifyingGlassIcon}
           {circleInfoIcon}
-          {bellIcon}
+          {bellIcon} */}
           <div className="flex flex-row space-x-1 justify-between items-center">
             <img
               className="w-8 rounded-full"
               src="https://clipground.com/images/img_avatar-png-2.png"
               alt="avt"
             />
-            <span>Username</span>
+            <span>Nguyễn Tuấn Toàn</span>
           </div>
         </div>
       </div>
