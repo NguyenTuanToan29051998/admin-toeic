@@ -19,9 +19,10 @@ export type AnswersType = {
 export type QuestionType = {
   id: number;
   content: string;
-  audio?: string;
-  images?: string;
+  audio: string;
+  images: string;
   typeQuestion: string;
+  correctAnswerWord: string;
   answers: AnswersType[];
 };
 

@@ -24,6 +24,7 @@ import {
 } from '../../models/question';
 import {TYPE_QUESTION} from '../../public/static/const';
 import Answer from '../../components/Answer';
+import {QuestionList} from '../../models/admin/Question';
 
 export const DEFAULT_PAGE_SIZE = 1;
 export const MIDDLE_PAGE_NUMBER = 5;
@@ -35,7 +36,9 @@ const QuestionCreate: FC = () => {
     boolean
   >(true);
   const [fileImg, setFileImg] = useState<File>(null);
-  const [questionType, setQuestionType] = useState<string>('PART 1: PHOTOS');
+  const [questionType, setQuestionType] = useState<string>(
+    'PART 6: TEXT COMPLETION',
+  );
   const [file, setFile] = useState<string>('');
   const [showErrorFile, setShowErrorFile] = useState({
     isErrorFormat: false,
@@ -47,7 +50,10 @@ const QuestionCreate: FC = () => {
       {
         id: 1,
         content: '',
+        audio: '',
+        images: '',
         typeQuestion: '',
+        correctAnswerWord: '',
         answers: [
           {
             order: 1,
@@ -62,7 +68,10 @@ const QuestionCreate: FC = () => {
     {
       id: 1,
       content: '',
+      audio: '',
+      images: '',
       typeQuestion: '',
+      correctAnswerWord: '',
       answers: [
         {
           order: 1,
@@ -89,7 +98,10 @@ const QuestionCreate: FC = () => {
     {
       id: 2,
       content: '',
+      audio: '',
+      images: '',
       typeQuestion: '',
+      correctAnswerWord: '',
       answers: [
         {
           order: 1,
@@ -116,7 +128,10 @@ const QuestionCreate: FC = () => {
     {
       id: 3,
       content: '',
+      audio: '',
+      images: '',
       typeQuestion: '',
+      correctAnswerWord: '',
       answers: [
         {
           order: 1,
@@ -143,7 +158,10 @@ const QuestionCreate: FC = () => {
     {
       id: 4,
       content: '',
+      audio: '',
+      images: '',
       typeQuestion: '',
+      correctAnswerWord: '',
       answers: [
         {
           order: 1,
@@ -268,7 +286,38 @@ const QuestionCreate: FC = () => {
   };
 
   const handleCreateExam = (): void => {
-    console.log(groupQuestion.content, 'conent');
+    const questionListClone = questionList;
+    questionListClone.map(item => {
+      switch (item.id) {
+        case 1:
+          return {
+            ...item,
+            correctAnswerWord: numberCorrectAnswerQuestionOne.toString(),
+          };
+        case 2:
+          return {
+            ...item,
+            correctAnswerWord: numberCorrectAnswerQuestionTwo.toString(),
+          };
+        case 3:
+          return {
+            ...item,
+            correctAnswerWord: numberCorrectAnswerQuestionThree.toString(),
+          };
+        default:
+          return {
+            ...item,
+            correctAnswerWord: numberCorrectAnswerQuestionFour.toString(),
+          };
+      }
+      return item;
+    }),
+      console.log(questionListClone, 'conent');
+    // const test = questionList.map(item => {
+    //   delete item.id;
+    //   return item;
+    // });
+    // console.log(test, 'test');
     console.log(answerList, 'lí');
     let typeQuestion;
     switch (questionType) {
@@ -334,6 +383,7 @@ const QuestionCreate: FC = () => {
       },
     };
     // questionApiManagement.createQuestion(data);
+
     // const data = {
     //   query:
     //     'mutation AddnNewQuetion($question: CreateQuestionInput!) {\n  createQuestion(createQuestionInput: $question) {\n    _id\n  }\n}\n\n# query getAllQuetion {\n#   questions(listQuestionsInput: { limit: 5, offset: 0 }) {\n#     _id\n#     content\n#     images\n#     audio\n#     typeQuestion\n#     answers {\n#       _id\n#       order\n#       content\n#       isCorrect\n#     }\n#   }\n# }',
@@ -359,9 +409,9 @@ const QuestionCreate: FC = () => {
   const handlChangeAnswer = (
     e: ChangeEvent<HTMLInputElement>,
     order: number,
+    id: number,
   ): void => {
     e.preventDefault();
-    console.log(e.target.value, 'll');
     setAnswerList(
       answerList.map(val => {
         if (val.order === order) {
@@ -370,6 +420,52 @@ const QuestionCreate: FC = () => {
         return val;
       }),
     );
+    // console.log(
+    //   questionList.map(item => {
+    //     item.answers.map(val => {
+    //       if (val.order === order) {
+    //         return {...val, content: e.target.value};
+    //       }
+    //       return val;
+    //     });
+    //     return item;
+    //   })
+    // );
+    // questionList.map((item, index) => {
+    //   item.answers.map((val, ind) => {
+    //     if (val.order === order) {
+    //       setQuestionList({...questionList[index].answers, [content: e.target.value] })
+    //     }
+    //     return {...item, val};
+    //   });
+    //   console.log(item, 'item');
+    //   return item;
+    // }),
+    const questionListClone = questionList;
+    questionListClone.map(item => {
+      item.answers.map(val => {
+        if (val.order === order && item.id === id) {
+          val.content = e.target.value;
+        }
+        return val;
+      });
+      return item;
+    }),
+      setQuestionList(questionListClone);
+  };
+
+  const handleChangeQuestionName = (
+    e: ChangeEvent<HTMLInputElement>,
+    id: number,
+  ): void => {
+    const questionListClone = questionList;
+    questionListClone.map(val => {
+      if (val.id === id) {
+        val.content = e.target.value;
+      }
+      return val;
+    });
+    setQuestionList(questionListClone);
   };
 
   const handleQuestionCreateElement = () => {
@@ -448,10 +544,11 @@ const QuestionCreate: FC = () => {
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[0].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 1)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -530,10 +627,11 @@ const QuestionCreate: FC = () => {
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[0].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 1)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -629,10 +727,11 @@ const QuestionCreate: FC = () => {
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[0].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 1)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -660,10 +759,11 @@ const QuestionCreate: FC = () => {
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[1].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 2)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -691,10 +791,11 @@ const QuestionCreate: FC = () => {
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[2].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 3)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -743,7 +844,7 @@ const QuestionCreate: FC = () => {
             <i>Tích để chọn 1 câu trả lời đúng</i>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 1:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -757,67 +858,25 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={questionList[0].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 1)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div>
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 2:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -831,67 +890,25 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionTwo === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionTwo(index)}
+                      value={questionList[1].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 2)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div>
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 3:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -905,63 +922,57 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionThree === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionThree(index)}
+                      value={questionList[2].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 3)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div>
+              <span className="text-white-0A1B39 font-normal">
+                Nhập câu hỏi 4:
+              </span>
+              <div className="flex gap-3 items-center">
                 <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
+                  type="search"
+                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
+                  placeholder="Nhập tên đề thi của bạn"
+                  aria-label="Search"
+                  aria-describedby="button-addon3"
                 />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
+                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
               </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+            </div>
+            <div className="mt-5">
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionThree === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionThree(index)}
+                      value={questionList[3].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
@@ -1073,6 +1084,9 @@ const QuestionCreate: FC = () => {
                   placeholder="Nhập câu hỏi"
                   aria-label="Search"
                   aria-describedby="button-addon3"
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    handleChangeQuestionName(e, 1)
+                  }
                 />
                 {exclamationCircleIcon('text-blue-2F80ED text-xl')}
               </div>
@@ -1080,14 +1094,15 @@ const QuestionCreate: FC = () => {
             <div className="mt-5">
               {[...Array(4)].map((_, index) => {
                 return (
-                  <div key={Math.random()}>
+                  <div key={`question-1-${index}`}>
                     <Answer
                       checked={numberCorrectAnswerQuestionOne === index && true}
                       onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      value={questionList[0].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 1)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -1104,6 +1119,9 @@ const QuestionCreate: FC = () => {
                   placeholder="Nhập câu hỏi"
                   aria-label="Search"
                   aria-describedby="button-addon3"
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    handleChangeQuestionName(e, 2)
+                  }
                 />
                 {exclamationCircleIcon('text-blue-2F80ED text-xl')}
               </div>
@@ -1111,14 +1129,15 @@ const QuestionCreate: FC = () => {
             <div className="mt-5">
               {[...Array(4)].map((_, index) => {
                 return (
-                  <div key={Math.random()}>
+                  <div key={`question-2-${index}`}>
                     <Answer
-                      checked={numberCorrectAnswerQuestionOne === index && true}
-                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      checked={numberCorrectAnswerQuestionTwo === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionTwo(index)}
+                      value={questionList[1].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 2)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -1135,6 +1154,9 @@ const QuestionCreate: FC = () => {
                   placeholder="Nhập câu hỏi"
                   aria-label="Search"
                   aria-describedby="button-addon3"
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    handleChangeQuestionName(e, 3)
+                  }
                 />
                 {exclamationCircleIcon('text-blue-2F80ED text-xl')}
               </div>
@@ -1142,14 +1164,17 @@ const QuestionCreate: FC = () => {
             <div className="mt-5">
               {[...Array(4)].map((_, index) => {
                 return (
-                  <div key={Math.random()}>
+                  <div key={`question-3-${index}`}>
                     <Answer
-                      checked={numberCorrectAnswerQuestionOne === index && true}
-                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      checked={
+                        numberCorrectAnswerQuestionThree === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionThree(index)}
+                      value={questionList[2].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 3)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -1166,6 +1191,9 @@ const QuestionCreate: FC = () => {
                   placeholder="Nhập câu hỏi"
                   aria-label="Search"
                   aria-describedby="button-addon3"
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    handleChangeQuestionName(e, 4)
+                  }
                 />
                 {exclamationCircleIcon('text-blue-2F80ED text-xl')}
               </div>
@@ -1173,14 +1201,17 @@ const QuestionCreate: FC = () => {
             <div className="mt-5">
               {[...Array(4)].map((_, index) => {
                 return (
-                  <div key={Math.random()}>
+                  <div key={`question-4-${index}`}>
                     <Answer
-                      checked={numberCorrectAnswerQuestionOne === index && true}
-                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
-                      value={answerList[index].content}
+                      checked={
+                        numberCorrectAnswerQuestionFour === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionFour(index)}
+                      value={questionList[3].answers[index].content}
                       handlChangeAnswer={(
                         e: ChangeEvent<HTMLInputElement>,
-                      ): void => handlChangeAnswer(e, index + 1)}
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
                     />
                   </div>
                 );
@@ -1221,63 +1252,23 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={`question-4-${index}`}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionFour === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionFour(index)}
+                      value={questionList[3].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
@@ -1295,64 +1286,23 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              {/* <span>Tích để chọn 1 câu trả lời đúng</span> */}
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={`question-4-${index}`}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionFour === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionFour(index)}
+                      value={questionList[3].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
@@ -1370,64 +1320,23 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              {/* <span>Tích để chọn 1 câu trả lời đúng</span> */}
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={`question-4-${index}`}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionFour === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionFour(index)}
+                      value={questionList[3].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
@@ -1445,844 +1354,23 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              {/* <span>Tích để chọn 1 câu trả lời đúng</span> */}
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-          </>
-        );
-      case 'PART 7: DOUBLE PASSAGES':
-        return (
-          <>
-            <div className="my-5">
-              <span>Nhập đoạn văn:</span>
-              <div className="mt-5">
-                <ReactQuill
-                  ref={quillRef}
-                  theme="snow"
-                  placeholder="Nội dung"
-                  modules={modules}
-                  // value={contentPost.content}
-                  // onChange={(value) => setContentPost({ ...contentPost, content: value })}
-                />
-              </div>
-            </div>
-            <i className="mt-5">Tích để chọn 1 câu trả lời đúng</i>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-          </>
-        );
-      case 'PART 7: TRIPLE PASSAGES':
-        return (
-          <>
-            <div className="my-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập đoạn văn:
-              </span>
-              <div className="mt-5">
-                <ReactQuill
-                  ref={quillRef}
-                  theme="snow"
-                  placeholder="Nội dung"
-                  modules={modules}
-                  // value={contentPost.content}
-                  // onChange={(value) => setContentPost({ ...contentPost, content: value })}
-                />
-              </div>
-            </div>
-            <i className="mt-5">Tích để chọn 1 câu trả lời đúng</i>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
-              </span>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập câu hỏi"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={`question-4-${index}`}>
+                    <Answer
+                      checked={
+                        numberCorrectAnswerQuestionFour === index && true
+                      }
+                      onClick={() => setNumberCorrectAnswerQuestionFour(index)}
+                      value={questionList[3].answers[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1, 4)}
+                      index={index + 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
