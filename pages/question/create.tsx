@@ -1,5 +1,5 @@
 import {useRouter} from 'next/router';
-import React, {FC, useMemo, useRef, useState} from 'react';
+import React, {ChangeEvent, FC, useMemo, useRef, useState} from 'react';
 import Dropdown from '../../components/Dropdown';
 import PaginationSection from '../../components/PaginationSection';
 import {tailwindOnly} from '../../hocs/tailwindOnly';
@@ -16,6 +16,14 @@ import {
 import dynamic from 'next/dynamic';
 const ReactQuill = dynamic(() => import('react-quill'), {ssr: false});
 import 'react-quill/dist/quill.snow.css';
+import {questionApiManagement} from '../../api-clients/question';
+import {
+  AnswersType,
+  GroupQuestionType,
+  QuestionType,
+} from '../../models/question';
+import {TYPE_QUESTION} from '../../public/static/const';
+import Answer from '../../components/Answer';
 
 export const DEFAULT_PAGE_SIZE = 1;
 export const MIDDLE_PAGE_NUMBER = 5;
@@ -33,12 +41,172 @@ const QuestionCreate: FC = () => {
     isErrorFormat: false,
     isErrorSize: false,
   });
-  const [collectNeeds, setCollectNeeds] = useState({
-    name: '',
-    email: '',
-    needsOfUnit: '',
-    documentList: undefined,
+  const [groupQuestion, setGroupQuestion] = useState<GroupQuestionType>({
+    content: '',
+    question: [
+      {
+        id: 1,
+        content: '',
+        typeQuestion: '',
+        answers: [
+          {
+            order: 1,
+            content: '',
+            isCorrect: true,
+          },
+        ],
+      },
+    ],
   });
+  const [questionList, setQuestionList] = useState<QuestionType[]>([
+    {
+      id: 1,
+      content: '',
+      typeQuestion: '',
+      answers: [
+        {
+          order: 1,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 2,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 3,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 4,
+          content: '',
+          isCorrect: true,
+        },
+      ],
+    },
+    {
+      id: 2,
+      content: '',
+      typeQuestion: '',
+      answers: [
+        {
+          order: 1,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 2,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 3,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 4,
+          content: '',
+          isCorrect: true,
+        },
+      ],
+    },
+    {
+      id: 3,
+      content: '',
+      typeQuestion: '',
+      answers: [
+        {
+          order: 1,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 2,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 3,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 4,
+          content: '',
+          isCorrect: true,
+        },
+      ],
+    },
+    {
+      id: 4,
+      content: '',
+      typeQuestion: '',
+      answers: [
+        {
+          order: 1,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 2,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 3,
+          content: '',
+          isCorrect: true,
+        },
+        {
+          order: 4,
+          content: '',
+          isCorrect: true,
+        },
+      ],
+    },
+  ]);
+  const [answerList, setAnswerList] = useState<AnswersType[]>([
+    {
+      order: 1,
+      content: '',
+      isCorrect: true,
+    },
+    {
+      order: 2,
+      content: '',
+      isCorrect: true,
+    },
+    {
+      order: 3,
+      content: '',
+      isCorrect: true,
+    },
+    {
+      order: 4,
+      content: '',
+      isCorrect: true,
+    },
+  ]);
+  const [
+    numberCorrectAnswerQuestionOne,
+    setNumberCorrectAnswerQuestionOne,
+  ] = useState(0);
+  const [
+    numberCorrectAnswerQuestionTwo,
+    setNumberCorrectAnswerQuestionTwo,
+  ] = useState(0);
+  const [
+    numberCorrectAnswerQuestionThree,
+    setNumberCorrectAnswerQuestionThree,
+  ] = useState(0);
+  const [
+    numberCorrectAnswerQuestionFour,
+    setNumberCorrectAnswerQuestionFour,
+  ] = useState(0);
+  // const [answer, setAnswer] = useState<AnswersType>();
 
   const questionTypeList = [
     'PART 1: PHOTOS',
@@ -80,11 +248,9 @@ const QuestionCreate: FC = () => {
   const onChangeFile = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const fileName = e.target.value.split(/(\\|\/)/g).pop();
     if (e.target.files && e.target.files[0].size / 1024 / 1024 >= 10) {
-      console.log(e.target.files[0], 'xx');
       setShowErrorFile({...showErrorFile, isErrorSize: true});
       return;
     }
-    console.log(e.target.files[0], 'kk');
     if (fileName.includes('.mp3')) {
       setShowErrorFile({
         ...showErrorFile,
@@ -92,16 +258,122 @@ const QuestionCreate: FC = () => {
         isErrorFormat: false,
       });
       setFile(e.target.value.split(/(\\|\/)/g).pop());
-      setCollectNeeds({...collectNeeds, documentList: e.target.files[0]});
+      setGroupQuestion({...groupQuestion, audio: e.target.files[0]});
     } else setShowErrorFile({...showErrorFile, isErrorFormat: true});
   };
 
   const hanldeDeleteFile = (): void => {
     setFile('');
-    setCollectNeeds({...collectNeeds, documentList: undefined});
+    setGroupQuestion({...groupQuestion, audio: undefined});
+  };
+
+  const handleCreateExam = (): void => {
+    console.log(groupQuestion.content, 'conent');
+    console.log(answerList, 'lí');
+    let typeQuestion;
+    switch (questionType) {
+      case 'PART 1: PHOTOS': {
+        typeQuestion = TYPE_QUESTION.PART1;
+        break;
+      }
+      case 'PART 2: QUESTION- RESPONSE': {
+        typeQuestion = TYPE_QUESTION.PART2;
+        break;
+      }
+      case 'PART 3: CONVERSATIONS': {
+        typeQuestion = TYPE_QUESTION.PART3;
+        break;
+      }
+      case 'PART 4: SHORT TALKS': {
+        typeQuestion = TYPE_QUESTION.PART4;
+        break;
+      }
+      case 'PART 5: INCOMPLETE SENTENCES': {
+        typeQuestion = TYPE_QUESTION.PART5;
+        break;
+      }
+      case 'PART 6: TEXT COMPLETION': {
+        typeQuestion = TYPE_QUESTION.PART6;
+        break;
+      }
+      case 'PART 7: SINGLE PASSAGES': {
+        typeQuestion = TYPE_QUESTION.PART7;
+        break;
+      }
+      case 'PART 7: DOUBLE PASSAGES': {
+        typeQuestion = TYPE_QUESTION.PART7;
+        break;
+      }
+      case 'PART 7: TRIPLE PASSAGES': {
+        typeQuestion = TYPE_QUESTION.PART7;
+        break;
+      }
+      default:
+        typeQuestion = TYPE_QUESTION.PART7;
+        break;
+    }
+    const data = {
+      query:
+        'mutation AddGroupQuestion($groupQuestion: CreateGroupQuestionInput!) {\n  createGroupQuestion(createGroupQuestionInput: $groupQuestion) {\n    _id,\n    content,\n    questions {\n      _id,\n      content,\n      groupQuestionId,\n\t\t\tanswers {\n        _id\n        content\n        isCorrect\n      },\n      correctAnswerWord\n    }\n  }\n}',
+      variables: {
+        groupQuestion: {
+          content: '',
+          images: '',
+          audio: '',
+          questions: [
+            {
+              content: '',
+              images: '',
+              audio: '',
+              typeQuestion: typeQuestion,
+              correctAnswerWord: numberCorrectAnswerQuestionOne.toString(),
+              answers: answerList,
+            },
+          ],
+        },
+      },
+    };
+    // questionApiManagement.createQuestion(data);
+    // const data = {
+    //   query:
+    //     'mutation AddnNewQuetion($question: CreateQuestionInput!) {\n  createQuestion(createQuestionInput: $question) {\n    _id\n  }\n}\n\n# query getAllQuetion {\n#   questions(listQuestionsInput: { limit: 5, offset: 0 }) {\n#     _id\n#     content\n#     images\n#     audio\n#     typeQuestion\n#     answers {\n#       _id\n#       order\n#       content\n#       isCorrect\n#     }\n#   }\n# }',
+    //   variables: {
+    //     question: {
+    //       content: 'toan-test',
+    //       images: '',
+    //       audio: '',
+    //       typeQuestion: 'PART1',
+    //       correctAnswerWord: '',
+    //       answers: [
+    //         {
+    //           order: 1,
+    //           content: 'sdsd',
+    //           isCorrect: true,
+    //         },
+    //       ],
+    //     },
+    //   },
+    // };
+  };
+
+  const handlChangeAnswer = (
+    e: ChangeEvent<HTMLInputElement>,
+    order: number,
+  ): void => {
+    e.preventDefault();
+    console.log(e.target.value, 'll');
+    setAnswerList(
+      answerList.map(val => {
+        if (val.order === order) {
+          return {...val, content: e.target.value};
+        }
+        return val;
+      }),
+    );
   };
 
   const handleQuestionCreateElement = () => {
+    // <div className={styles.content} dangerouslySetInnerHTML={{ __html: previewContent(item.content) }} />
     switch (questionType) {
       case 'PART 1: PHOTOS':
         return (
@@ -152,7 +424,7 @@ const QuestionCreate: FC = () => {
                 <div className="mt-4">
                   <label
                     htmlFor="files"
-                    className={`flex gap-1 border rounded-md py-1 px-3 w-28 justify-center items-center`}>
+                    className={`flex gap-1 border rounded-md py-1 px-3 w-28 justify-center items-center cursor-pointer`}>
                     {plusIconBS()}
                     <div>Tải audio</div>
                   </label>
@@ -170,7 +442,21 @@ const QuestionCreate: FC = () => {
             </div>
             <div>
               <i>Tích để chọn 1 câu trả lời đúng</i>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] mt-5 w-5/6 mb-3 p-4">
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={`answer-${index}`}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
+              {/* <div className="flex gap-3 items-center bg-[#F9F9F9] mt-5 w-5/6 mb-3 p-4">
                 <input
                   id="country-option-1"
                   type="radio"
@@ -179,73 +465,21 @@ const QuestionCreate: FC = () => {
                   className="h-5 w-5 accent-green-600"
                   aria-labelledby="country-option-1"
                   aria-describedby="country-option-1"
+                  checked={numberCorrectAnswerQuestionOne === 0 && true}
+                  onClick={() => setNumberCorrectAnswerQuestionOne(0)}
                 />
                 <input
                   id=""
                   type="text"
                   name="countries"
                   placeholder="Câu trả lời 1"
-                  // value="USA"
+                  value={answerList[0].content}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                    handlChangeAnswer(e, 1)
+                  }
                   className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
                 />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 4"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              </div> */}
             </div>
           </>
         );
@@ -290,65 +524,20 @@ const QuestionCreate: FC = () => {
             </div>
             <div>
               <i>Tích để chọn 1 câu trả lời đúng</i>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] mt-5 w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                  checked
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                  checked
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(3)].map((_, index) => {
+                return (
+                  <div key={`answer-${index}`}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
@@ -356,6 +545,32 @@ const QuestionCreate: FC = () => {
         return (
           <>
             <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="...">
+                <span className="">Tải ảnh cho câu hỏi:</span>
+                {fileImg && (
+                  <div className="avatar w-40 h-40 mt-4">
+                    <img
+                      src={URL.createObjectURL(fileImg)}
+                      className="w-full h-full"
+                    />
+                  </div>
+                )}
+                <label
+                  htmlFor="dropzone-file"
+                  className="justify-center cursor-pointer">
+                  <div className="flex gap-1 border rounded-md mt-4 py-1 px-3 w-28 justify-center items-center mb-5">
+                    {plusIconBS('text-2xl')}
+                    <div>Tải ảnh</div>
+                  </div>
+                  <input
+                    id="dropzone-file"
+                    type="file"
+                    className="hidden"
+                    accept=".png, .jpeg, .jpg"
+                    onChange={(e): void => uploadImage(e)}
+                  />
+                </label>
+              </div>
               <div className="...">
                 <span className="">Tải Audio cho câu hỏi:</span>
                 {file && (
@@ -375,7 +590,7 @@ const QuestionCreate: FC = () => {
                 <div className="mt-4">
                   <label
                     htmlFor="files"
-                    className={`flex gap-1 border rounded-md py-1 px-3 w-28 justify-center items-center`}>
+                    className={`flex gap-1 border rounded-md py-1 px-3 w-28 justify-center items-center cursor-pointer`}>
                     {plusIconBS()}
                     <div>Tải audio</div>
                   </label>
@@ -394,7 +609,7 @@ const QuestionCreate: FC = () => {
             <i>Tích để chọn 1 câu trả lời đúng</i>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 1:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -408,67 +623,24 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <div>
+            <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 2:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -482,67 +654,24 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <div>
+            <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 3:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -556,63 +685,20 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
@@ -968,25 +1054,17 @@ const QuestionCreate: FC = () => {
                   theme="snow"
                   placeholder="Nội dung"
                   modules={modules}
-                  // value={contentPost.content}
-                  // onChange={(value) => setContentPost({ ...contentPost, content: value })}
+                  value={groupQuestion.content}
+                  onChange={value =>
+                    setGroupQuestion({...groupQuestion, content: value})
+                  }
                 />
               </div>
-              {/* <div className="flex gap-3 items-center">
-                <input
-                  type="search"
-                  className="form-control relative flex-auto min-w-0 block mt-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border-solid border-white-D9D9D9 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none border-1 rounded-sm w-full"
-                  placeholder="Nhập tên đề thi của bạn"
-                  aria-label="Search"
-                  aria-describedby="button-addon3"
-                />
-                {exclamationCircleIcon('text-blue-2F80ED text-xl')}
-              </div> */}
             </div>
             <i>Tích để chọn 1 câu trả lời đúng</i>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 1:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -1000,67 +1078,24 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 2:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -1074,67 +1109,24 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 3:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -1148,67 +1140,24 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-5">
               <span className="text-white-0A1B39 font-normal">
-                Nhập câu hỏi:
+                Nhập câu hỏi 4:
               </span>
               <div className="flex gap-3 items-center">
                 <input
@@ -1222,63 +1171,20 @@ const QuestionCreate: FC = () => {
               </div>
             </div>
             <div className="mt-5">
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 1"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 2"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
-              <div className="flex gap-3 items-center bg-[#F9F9F9] w-5/6 mb-3 p-4">
-                <input
-                  id="country-option-1"
-                  type="radio"
-                  name="countries"
-                  value="USA"
-                  className="h-5 w-5 accent-green-600 "
-                  aria-labelledby="country-option-1"
-                  aria-describedby="country-option-1"
-                />
-                <input
-                  id=""
-                  type="text"
-                  name="countries"
-                  placeholder="Câu trả lời 3"
-                  // value="USA"
-                  className="h-8 w-full border rounded-sm border-[#D9D9D9] outline-none p-2 bg-white"
-                />
-              </div>
+              {[...Array(4)].map((_, index) => {
+                return (
+                  <div key={Math.random()}>
+                    <Answer
+                      checked={numberCorrectAnswerQuestionOne === index && true}
+                      onClick={() => setNumberCorrectAnswerQuestionOne(index)}
+                      value={answerList[index].content}
+                      handlChangeAnswer={(
+                        e: ChangeEvent<HTMLInputElement>,
+                      ): void => handlChangeAnswer(e, index + 1)}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
@@ -2499,7 +2405,7 @@ const QuestionCreate: FC = () => {
             data-modal-toggle="default-modal"
             type="button"
             className="flex gap-2 items-center text-sm px-8 py-2.5 border-2 border-green-00BF6F text-white font-medium leading-tight rounded-r-[2px] hover:bg-green-00BF6F focus:outline-none focus:ring-0 transition duration-150 ease-in-out bg-green-00BF6F"
-            onClick={(): void => setShowModalCreateQuestion(false)}>
+            onClick={(): void => handleCreateExam()}>
             Tạo câu hỏi
           </button>
         </div>

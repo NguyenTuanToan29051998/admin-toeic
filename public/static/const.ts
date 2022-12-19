@@ -1,0 +1,11 @@
+export enum TYPE_QUESTION {
+  PART1 = 'PART1',
+  PART2 = 'PART2',
+  PART3 = 'PART3',
+  PART4 = 'PART4',
+  PART5 = 'PART5',
+  PART6 = 'PART6',
+  PART7 = 'PART7',
+  GRAMMAR = 'GRAMMAR',
+  VOCABULARY = 'VOCABULARY',
+}
